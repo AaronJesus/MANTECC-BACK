@@ -66,10 +66,17 @@ export const updateUser = async (req, res) => {
 		await pool
 			.request()
 			.input('RFC', sql.VarChar, RFC)
-			.input('Contraseña', sql.Char, Contraseña)
 			.input('Nombres', sql.VarChar, Nombres)
 			.input('id_Usuario', sql.Int, id_Usuario)
 			.query(queries.updateUser);
+		!!Contraseña &&
+			(await pool
+				.request()
+				.input('RFC', sql.VarChar, RFC)
+				.input('Contraseña', sql.Char, Contraseña)
+				.query(
+					'UPDATE Usuarios SET Contraseña = @Contraseña WHERE RFC = @RFC'
+				));
 		res.json('Update Usuario con exito');
 	} catch (error) {
 		res.status(500);

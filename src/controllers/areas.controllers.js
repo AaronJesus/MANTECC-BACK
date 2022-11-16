@@ -1,3 +1,4 @@
+import { pool } from 'mssql';
 import { getConnection, sql } from '../database/connection';
 import { queries } from '../database/query';
 
@@ -71,6 +72,17 @@ export const updateArea = async (req, res) => {
 			.input('Nombre', sql.VarChar, Nombre)
 			.query(queries.updateArea);
 		res.json('Area modificada');
+	} catch (error) {
+		res.status(500);
+		res.send(error.message);
+	}
+};
+
+export const getCarreras = async (req, res) => {
+	try {
+		const pool = await getConnection();
+		const resPool = await pool.request().query(queries.getCarreras);
+		res.json(resPool.recordset);
 	} catch (error) {
 		res.status(500);
 		res.send(error.message);

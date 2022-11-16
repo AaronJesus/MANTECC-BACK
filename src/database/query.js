@@ -72,7 +72,7 @@ export const queries = {
 		'INSERT INTO Usuarios (RFC, Contraseña, Nombres, id_Usuario, Estatus) VALUES (@RFC, @Contraseña,' +
 		' @Nombres, @id_Usuario, 1 )',
 	updateUser:
-		'UPDATE Usuarios SET Contraseña = @Contraseña, Nombres = @Nombres, id_Usuario = @id_Usuario WHERE RFC = @RFC',
+		'UPDATE Usuarios SET Nombres = @Nombres, id_Usuario = @id_Usuario WHERE RFC = @RFC',
 	updateEstadoUser: 'UPDATE Usuarios SET Estatus = @Estatus WHERE RFC = @RFC',
 	delUser: 'DELETE FROM Usuarios WHERE RFC = @RFC ',
 
@@ -86,19 +86,22 @@ export const queries = {
 	newAlumno:
 		'INSERT INTO Usuarios (RFC, Contraseña, Nombres, id_Usuario, Estatus) VALUES (@RFC, @Contraseña,' +
 		' @Nombres, 3, 1  ) ' +
-		'INSERT INTO Alumnos_Servicio (No_Control, Clave_Nombre_Carrera, RFC) VALUES (@No_Control,' +
-		' @Clave_Nombre_Carrera, @RFC)',
+		'INSERT INTO Alumnos_Servicio (No_Control, Clave_Carrera, RFC) VALUES (@No_Control,' +
+		' @Clave_Carrera, @RFC)',
 	updateAlumnos:
-		'UPDATE Usuarios SET Contraseña = @Contraseña, Nombres = @Nombres WHERE RFC = @RFC ' +
-		'UPDATE Alumnos_Servicio SET No_Control = @No_Control, Clave_Nombre_Carrera = Clave_Nombre_Carrera WHERE RFC = @RFC ',
+		'UPDATE Usuarios SET Nombres = @Nombres WHERE RFC = @RFC ' +
+		'UPDATE Alumnos_Servicio SET No_Control = @No_Control, Clave_Carrera = @Clave_Carrera WHERE RFC = @RFC ',
 	delAlumno:
 		'DELETE FROM Alumnos_Servicio WHERE RFC = @RFC ' +
 		'DELETE FROM Usuarios WHERE RFC = @RFC ',
 
-	//por hacer
-	//incorporar los update de la orden admin y calficaciones
-	//controllers de los problemas
-	//configuraciones ????????
+	getCarreras: 'SELECT * FROM Carreras',
+
+	//configuraciones
+	getConfigs: 'SELECT * FROM Configuraciones',
+	getConfig: 'SELECT * FROM Configuraciones WHERE idConfig = @idConfig',
+	upConfig:
+		'UPDATE Configuraciones SET Valor = @Valor WHERE idConfig = @idConfig',
 	//No hay opciones mas que Get para los tipos de Usuarios, tipo 1 = admin, tipo 2 = cliente, tipo 3 = alumno
 	getTipoUser: 'SELECT * FROM Tipo_Usuarios',
 };

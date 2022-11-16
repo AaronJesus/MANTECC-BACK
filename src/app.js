@@ -6,6 +6,7 @@ import estados from './routes/estados.routes';
 import usuarios from './routes/usuarios.routes';
 import alumnos from './routes/alumnos.routes';
 import problemas from './routes/problemas.routes';
+import configuraciones from './routes/configs.routes';
 import cors from 'cors';
 const app = express();
 
@@ -33,5 +34,6 @@ app.use(areas);
 app.use(usuarios);
 app.use(alumnos);
 app.use(problemas);
+app.use(configuraciones);
 
 export default app;
