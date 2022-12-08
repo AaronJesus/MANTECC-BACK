@@ -12,6 +12,36 @@ export const getProbelmas = async (req, res) => {
 	}
 };
 
+export const getProbelmasAdmin = async (req, res) => {
+	const Tipo = 'Admin';
+	try {
+		const pool = await getConnection();
+		const resPool = await pool
+			.request()
+			.input('Tipo', sql.VarChar, Tipo)
+			.query(queries.getProbelmasByTipo);
+		res.json(resPool && resPool.recordset);
+	} catch (error) {
+		res.status(500);
+		res.send(error);
+	}
+};
+
+export const getProbelmasCliente = async (req, res) => {
+	const Tipo = 'Cliente';
+	try {
+		const pool = await getConnection();
+		const resPool = await pool
+			.request()
+			.input('Tipo', sql.VarChar, Tipo)
+			.query(queries.getProbelmasByTipo);
+		res.json(resPool && resPool.recordset);
+	} catch (error) {
+		res.status(500);
+		res.send(error);
+	}
+};
+
 export const getProbelma = async (req, res) => {
 	const { id } = req.params;
 	try {

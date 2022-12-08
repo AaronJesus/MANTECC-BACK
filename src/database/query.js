@@ -1,45 +1,56 @@
 export const queries = {
 	//Queries de Solicitud
 	getSolicitudesProceso:
-		'SELECT * FROM Solicitud_Mantenimiento WHERE Folio_Solicitud IN (SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 0)',
+		'SELECT * FROM Solicitud_Mantenimiento WHERE Folio_Completo IN (SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 0) ' +
+		'AND idPeriodo = @idPeriodo',
 	getSolicitudesTerminadas:
-		'SELECT * FROM Solicitud_Mantenimiento WHERE Folio_Solicitud IN ( SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 1)',
+		'SELECT * FROM Solicitud_Mantenimiento WHERE Folio_Completo IN ( SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 1) ' +
+		'AND idPeriodo = @idPeriodo',
 	getSolicitud:
-		'SELECT * FROM Solicitud_Mantenimiento WHERE Folio_Solicitud = @Folio_Solicitud',
+		'SELECT * FROM Solicitud_Mantenimiento WHERE Folio_Completo = @Folio_Completo',
+	//solicitud en proceso x rfc
+	getSolicitudxRFC:
+		'SELECT * FROM Solicitud_Mantenimiento WHERE RFC = @RFC AND Folio_Completo IN ' +
+		'(SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 0)',
+	getTerminadaxRFC:
+		'SELECT * FROM Solicitud_Mantenimiento WHERE RFC = @RFC AND Folio_Completo IN ' +
+		'(SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 1)',
 	getOrden:
-		'SELECT * FROM Orden_Trabajo WHERE Folio_Solicitud = @Folio_Solicitud',
+		'SELECT * FROM Orden_Trabajo WHERE Folio_Completo = @Folio_Completo',
 	//Eliminar la solicitud, el estado de la solicitud y la orden de la soliciutd
 	delSolicitud:
-		'DELETE FROM Solicitud_Mantenimiento WHERE Folio_Solicitud = @Folio_Solicitud ' +
-		'DELETE FROM Orden_Trabajo WHERE Folio_Solicitud = @Folio_Solicitud ' +
+		'DELETE FROM Solicitud_Mantenimiento WHERE Folio_Completo = @Folio_Completo ' +
+		'DELETE FROM Orden_Trabajo WHERE Folio_Completo = @Folio_Completo ' +
 		'DELETE FROM Estado WHERE idEstatus = @idEstatus ',
 	//Nueva solicitud = nueva solicitud sin id Estado, ponerle el id Estado de la solicitud recien creada(new solicitud y new Estado),
 	// y para terminar crar la orden correspondiente a la solicitud
 	getNuevaSolicitud:
-		'SELECT TOP 1 Folio_Solicitud from Solicitud_Mantenimiento ORDER BY Folio_Solicitud DESC',
+		'SELECT TOP 1 Folio_Completo from Solicitud_Mantenimiento ORDER BY Folio_Completo DESC',
+	getFolioxPeriodo:
+		'SELECT MAX(Folio) AS Folio from Solicitud_Mantenimiento WHERE idPeriodo = @idPeriodo',
 	newSolicitud:
-		'INSERT INTO Solicitud_Mantenimiento (Clave_Area, Nombre_Solicitante ,Fecha_Elaboracion,Descripcion_Servicio_Falla,Lugar_Especifico,Horario_Atencion, Asignado_a) ' +
-		'VALUES (@Clave_Area, @Nombre_Solicitante , @Fecha_Elaboracion, @Descripcion_Servicio_Falla, @Lugar_Especifico, @Horario_Atencion, @Asignado_a)',
-	newEstado:
-		'UPDATE Solicitud_Mantenimiento SET idEstatus = @idEstatus WHERE Folio_Solicitud = @Folio_Solicitud ' +
+		'INSERT INTO Solicitud_Mantenimiento (Folio_Completo, Clave_Area, Nombre_Solicitante ,Fecha_Elaboracion,Descripcion_Servicio_Falla,Lugar_Especifico, ' +
+		'Horario_Atencion, Asignado_a, idEstatus, idPeriodo, Folio, RFC) ' +
+		'VALUES (@Folio_Completo, @Clave_Area, @Nombre_Solicitante , @Fecha_Elaboracion, @Descripcion_Servicio_Falla, @Lugar_Especifico, ' +
+		' @Horario_Atencion, @Asignado_a, @idEstatus, @idPeriodo, @Folio, @RFC) ' +
 		'INSERT INTO Estado (idEstatus, Aceptado, Rechazado, En_proceso, Terminado_tecnico, Aprobado_admin, Aprobado_cliente) ' +
 		'VALUES (@idEstatus, 0,0,0,0,0,0)',
 	updateEstado:
 		'UPDATE Estado SET Aceptado = @Aceptado, Rechazado = @Rechazado, En_proceso = @En_proceso, Terminado_tecnico = @Terminado_tecnico, ' +
 		'Aprobado_admin = @Aprobado_admin, Aprobado_cliente = @Aprobado_cliente WHERE idEstatus = @idEstatus',
 	newOrden:
-		'INSERT INTO Orden_Trabajo (Folio_Solicitud, Mantenimiento_Interno, Tipo_Servicio, Asignado_a, Liberado_Por, Aprobado_Por) ' +
-		'VALUES (@Folio_Solicitud, 1 , @Tipo_Servicio , @Asignado_a, @Liberado_Por, @Aprobado_Por)',
+		'INSERT INTO Orden_Trabajo (Folio_Completo, Mantenimiento_Interno, Tipo_Servicio, Asignado_a, Liberado_Por, Aprobado_Por) ' +
+		'VALUES (@Folio_Completo, 1 , @Tipo_Servicio , @Asignado_a, @Liberado_Por, @Aprobado_Por)',
 	updateOrdenAdmin:
 		'UPDATE Orden_Trabajo SET Mantenimiento_Interno = @Mantenimiento_Interno, Tipo_Servicio = @Tipo_Servicio, ' +
-		'Asignado_a = @Asignado_a WHERE Folio_Solicitud = @Folio_Solicitud',
+		'Asignado_a = @Asignado_a WHERE Folio_Completo = @Folio_Completo',
 	updateOrdenFecha:
 		'UPDATE Orden_Trabajo SET Fecha_Realizacion = @Fecha_Realizacion, Fecha_Aprobacion = @Fecha_Realizacion, Fecha_Liberacion = @Fecha_Realizacion, ' +
-		'No_Control = @No_Control, Trabajo_Realizado = @Trabajo_Realizado WHERE Folio_Solicitud = @Folio_Solicitud',
+		'No_Control = @No_Control, Trabajo_Realizado = @Trabajo_Realizado WHERE Folio_Completo = @Folio_Completo',
 	updateCalifOrden:
 		'UPDATE Orden_Trabajo SET Calificacion_Servicio = @Calificacion_Servicio, Comentario_Servicio = @Comentario_Servicio ' +
-		'WHERE Folio_Solicitud = @Folio_Solicitud ' +
-		'UPDATE Estado SET Aprobado_Cliente = 1 WHERE idEstatus = @Folio_Solicitud',
+		'WHERE Folio_Completo = @Folio_Completo ' +
+		'UPDATE Estado SET Aprobado_Cliente = 1 WHERE idEstatus = @Folio_Completo',
 
 	//Queries de Areas
 	getAreas: 'SELECT * FROM Areas',
@@ -65,14 +76,16 @@ export const queries = {
 		'DELETE FROM Problemas_Frecuentes WHERE idProblema = @idProblema ',
 
 	//Queries de Usuarios
+	getAllUsers: 'SELECT * FROM Usuarios',
 	getUsers: 'SELECT * FROM Usuarios WHERE id_Usuario = 1 OR id_Usuario = 2',
+	getAdmins: 'SELECT * FROM Usuarios WHERE id_Usuario = 1',
 	getUser:
 		'SELECT DISTINCT * FROM Usuarios WHERE (id_Usuario = 1 OR id_Usuario = 2) AND RFC = @RFC',
 	newUser:
 		'INSERT INTO Usuarios (RFC, Contraseña, Nombres, id_Usuario, Estatus) VALUES (@RFC, @Contraseña,' +
 		' @Nombres, @id_Usuario, 1 )',
 	updateUser:
-		'UPDATE Usuarios SET Nombres = @Nombres, id_Usuario = @id_Usuario WHERE RFC = @RFC',
+		'UPDATE Usuarios SET RFC = @RFC2 Nombres = @Nombres, id_Usuario = @id_Usuario WHERE RFC = @RFC',
 	updateEstadoUser: 'UPDATE Usuarios SET Estatus = @Estatus WHERE RFC = @RFC',
 	delUser: 'DELETE FROM Usuarios WHERE RFC = @RFC ',
 
@@ -89,7 +102,7 @@ export const queries = {
 		'INSERT INTO Alumnos_Servicio (No_Control, Clave_Carrera, RFC) VALUES (@No_Control,' +
 		' @Clave_Carrera, @RFC)',
 	updateAlumnos:
-		'UPDATE Usuarios SET Nombres = @Nombres WHERE RFC = @RFC ' +
+		'UPDATE Usuarios SET RFC = @RFC2 Nombres = @Nombres WHERE RFC = @RFC ' +
 		'UPDATE Alumnos_Servicio SET No_Control = @No_Control, Clave_Carrera = @Clave_Carrera WHERE RFC = @RFC ',
 	delAlumno:
 		'DELETE FROM Alumnos_Servicio WHERE RFC = @RFC ' +
@@ -102,6 +115,22 @@ export const queries = {
 	getConfig: 'SELECT * FROM Configuraciones WHERE idConfig = @idConfig',
 	upConfig:
 		'UPDATE Configuraciones SET Valor = @Valor WHERE idConfig = @idConfig',
+	getPeriodos: 'SELECT * FROM Periodos',
+	getPeriodo: 'SELECT Periodo FROM Periodos WHERE idPeriodo = @idPeriodo',
+	newPeriodo: 'INSERT INTO Periodos (Periodo) VALUES (@Periodo) ',
+	delPeriodo: 'DELETE FROM Periodos WHERE idPeriodo = @idPeriodo',
+	//idCOnfiguraciones 1=#Control 2=Periodo 3=Revision 4=Asignado a 5=Aprobado por
+
 	//No hay opciones mas que Get para los tipos de Usuarios, tipo 1 = admin, tipo 2 = cliente, tipo 3 = alumno
 	getTipoUser: 'SELECT * FROM Tipo_Usuarios',
+
+	//Buscadores
+	SolicitudesProcesoQuery:
+		`SELECT * FROM Solicitud_Mantenimiento WHERE idPeriodo LIKE @idPeriodo  AND RFC LIKE @RFC AND  ` +
+		`Nombre_Solicitante LIKE @Nombre_Solicitante AND Clave_Area LIKE @Clave_Area AND  Folio_Completo ` +
+		` LIKE @Folio_Completo AND Asignado_a LIKE @Asignado_a AND Folio_Completo IN (SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 0)`,
+	SolicitudesTerminadaQuery:
+		`SELECT * FROM Solicitud_Mantenimiento WHERE idPeriodo LIKE @idPeriodo  AND RFC LIKE @RFC AND  ` +
+		`Nombre_Solicitante LIKE @Nombre_Solicitante AND Clave_Area LIKE @Clave_Area AND  Folio_Completo ` +
+		` LIKE @Folio_Completo AND Asignado_a LIKE @Asignado_a AND Folio_Completo IN (SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 1)`,
 };

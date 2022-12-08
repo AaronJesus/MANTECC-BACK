@@ -7,7 +7,11 @@ import usuarios from './routes/usuarios.routes';
 import alumnos from './routes/alumnos.routes';
 import problemas from './routes/problemas.routes';
 import configuraciones from './routes/configs.routes';
+import pdf from './routes/pdf.routes';
 import cors from 'cors';
+import { queries } from './database/query';
+import { getUsuarios } from './controllers/usuarios.controllers';
+
 const app = express();
 
 //settings
@@ -35,5 +39,6 @@ app.use(usuarios);
 app.use(alumnos);
 app.use(problemas);
 app.use(configuraciones);
+app.use(pdf);
 
 export default app;

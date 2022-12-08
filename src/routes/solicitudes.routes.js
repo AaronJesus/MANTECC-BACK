@@ -6,6 +6,10 @@ import {
 	getSolicitudes,
 	getSolicitudesProceso,
 	getSolicitudesTerminadas,
+	getSolProcesoQuery,
+	getSolRFC,
+	getSolTerminadaRFC,
+	getSolTermQuery,
 	newSolicitud,
 	updateOrdenAdmin,
 	updateOrdenCliente,
@@ -13,14 +17,18 @@ import {
 
 const router = Router();
 
-router.get('/solicitudes', getSolicitudesProceso);
-router.get('/solicitudes/terminadas', getSolicitudesTerminadas);
+router.put('/solicitudes', getSolicitudesProceso);
+router.put('/solicitudes/query', getSolProcesoQuery);
+router.put('/solicitudes/terminadas', getSolicitudesTerminadas);
+router.put('/solicitudes/terminadas/query', getSolTermQuery);
 router.post('/solicitudes', newSolicitud);
-router.get('/solicitud/:Folio_Solicitud', getSolicitud);
-router.delete('/solicitud/:Folio_Solicitud', deleteSol);
+router.get('/solicitud/:Folio_Completo', getSolicitud);
+router.get('/solicitudRFC/:RFC', getSolRFC);
+router.get('/solicitudRFC/term/:RFC', getSolTerminadaRFC);
+router.delete('/solicitud/:Folio_Completo', deleteSol);
 
-router.put('/orden/:Folio_Solicitud', updateOrdenAdmin);
-router.post('/orden/:Folio_Solicitud', updateOrdenCliente);
-router.get('/orden/:Folio_Solicitud', getOrden);
+router.put('/orden/:Folio_Completo', updateOrdenAdmin);
+router.post('/orden/:Folio_Completo', updateOrdenCliente);
+router.get('/orden/:Folio_Completo', getOrden);
 
 export default router;

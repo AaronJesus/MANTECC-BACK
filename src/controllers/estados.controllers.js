@@ -47,7 +47,7 @@ export const updateEstado = async (req, res) => {
 			.input('Terminado_tecnico', sql.Bit, Terminado_tecnico)
 			.input('Aprobado_admin', sql.Bit, Aprobado_admin)
 			.input('Aprobado_cliente', sql.Bit, Aprobado_cliente)
-			.input('idEstatus', sql.Int, idEstatus)
+			.input('idEstatus', sql.VarChar, idEstatus)
 			.query(queries.updateEstado);
 		res.json({
 			Aceptado: Aceptado,

@@ -3,6 +3,8 @@ import {
 	delProblema,
 	getProbelma,
 	getProbelmas,
+	getProbelmasAdmin,
+	getProbelmasCliente,
 	newProb,
 	updateProblema,
 } from '../controllers/problemas.controllers';
@@ -10,6 +12,8 @@ import {
 const router = Router();
 
 router.get('/problemas', getProbelmas);
+router.get('/problemasAdmin', getProbelmasAdmin);
+router.get('/problemasCliente', getProbelmasCliente);
 router.get('/problema/:id', getProbelma);
 router.post('/problemas', newProb);
 router.put('/problema/:id', updateProblema);
