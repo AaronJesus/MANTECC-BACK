@@ -21,7 +21,6 @@ export const getArea = async (req, res) => {
 			.request()
 			.input('Clave_Area', sql.Int, clave)
 			.query(queries.getArea);
-		console.log(resPool);
 		res.json(resPool.recordset);
 	} catch (error) {
 		res.status(500);

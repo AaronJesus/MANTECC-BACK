@@ -106,3 +106,19 @@ export const delProblema = async (req, res) => {
 		res.send(error);
 	}
 };
+
+export const probQuery = async (req, res) => {
+	const { Descripcion, Tipo } = req.body;
+	try {
+		const pool = await getConnection();
+		const resPool = await pool
+			.request()
+			.input('Descripcion', sql.VarChar, Descripcion + '%')
+			.input('Tipo', sql.VarChar, Tipo + '%')
+			.query(queries.problemasQuery);
+		!!resPool && res.json(resPool.recordset);
+	} catch (error) {
+		res.status(500);
+		res.send(error);
+	}
+};

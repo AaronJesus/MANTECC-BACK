@@ -47,15 +47,23 @@ export const newUser = async (req, res) => {
 		//y que sea mas dificil de crackear
 		const hashPassword = await bcrypt.hash(Contraseña, 10);
 		const pool = await getConnection();
-		await pool
-			.request()
-			.input('RFC', sql.VarChar, RFC)
-			.input('Contraseña', sql.Char, hashPassword)
-			.input('Nombres', sql.VarChar, Nombres)
-			.input('id_Usuario', sql.Int, id_Usuario)
-			.query(queries.newUser);
-		res.json('Nuevo Usuario con exito');
+		const resPool = await pool.request().query(queries.getAllUsers);
+		const users = resPool.recordset;
+		const user = users.find((user) => user.RFC === RFC);
+		if (!!user) {
+			res.json({ msg: 'Ya existe un usuario con este RFC' });
+		} else {
+			await pool
+				.request()
+				.input('RFC', sql.VarChar, RFC)
+				.input('Contraseña', sql.Char, hashPassword)
+				.input('Nombres', sql.VarChar, Nombres)
+				.input('id_Usuario', sql.Int, id_Usuario)
+				.query(queries.newUser);
+			res.json('Nuevo Usuario con exito');
+		}
 	} catch (error) {
+		console.log(error);
 		res.status(500);
 		res.send(error.message);
 	}
@@ -68,8 +76,8 @@ export const login = async (req, res) => {
 		const resPool = await pool.request().query(queries.getAllUsers);
 		const users = resPool.recordset;
 		const user = users.find((user) => user.RFC === RFC);
-		if (user === null) {
-			return res.status(400).send('No se encontro usuario');
+		if (user === null || !user) {
+			return res.status(400).send({ msg: 'El RFC o Contraseña no coinciden' });
 		}
 		if (await bcrypt.compare(Contraseña, user.Contraseña)) {
 			const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
@@ -128,6 +136,7 @@ export const updateUser = async (req, res) => {
 			await pool
 				.request()
 				.input('RFC', sql.VarChar, RFC)
+				.input('RFC2', sql.VarChar, RFC2)
 				.input('Contraseña', sql.Char, hashPassword)
 				.query('UPDATE Usuarios SET Contraseña = @Contraseña WHERE RFC = @RFC');
 		}
@@ -149,6 +158,23 @@ export const updateUserEstado = async (req, res) => {
 			.input('Estatus', sql.Bit, Estatus)
 			.query(queries.updateEstadoUser);
 		res.json('Update Estado Usuario con exito');
+	} catch (error) {
+		res.status(500);
+		res.send(error.message);
+	}
+};
+
+export const userQuery = async (req, res) => {
+	try {
+		const { RFC, Nombres, id_Usuario } = req.body;
+		const pool = await getConnection();
+		const resPool = await pool
+			.request()
+			.input('RFC', sql.VarChar, RFC + '%')
+			.input('Nombres', sql.VarChar, Nombres + '%')
+			.input('id_Usuario', sql.VarChar, id_Usuario + '%')
+			.query(queries.userQuery);
+		!!resPool && res.json(resPool.recordset);
 	} catch (error) {
 		res.status(500);
 		res.send(error.message);

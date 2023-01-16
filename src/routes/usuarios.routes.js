@@ -9,6 +9,7 @@ import {
 	getAdmins,
 	login,
 	authToken,
+	userQuery,
 } from '../controllers/usuarios.controllers';
 
 const router = Router();
@@ -21,6 +22,7 @@ router.get('/usuarios', getUsuarios);
 router.get('/admins', getAdmins);
 router.get('/usuario/:RFC', getUsuario);
 router.post('/usuarios', newUser);
+router.put('/usuario/query', userQuery);
 router.put('/usuario/:RFC', updateUser);
 router.put('/usuarioEstado/:RFC', updateUserEstado);
 router.delete('/usuario/:RFC', deleteUser);

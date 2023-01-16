@@ -60,7 +60,7 @@ export const newSolicitud = async (req, res) => {
 		const Folio = getFolio.recordset[0].Folio
 			? getFolio.recordset[0].Folio + 1
 			: 1;
-		const Folio_Completo = Periodo.recordset[0].Periodo + '-' + Folio;
+		const Folio_Completo = Folio + '-' + Periodo.recordset[0].Periodo;
 		//Creacion de la solicitud y estado de la solicitud
 		await pool
 			.request()
@@ -89,12 +89,14 @@ export const newSolicitud = async (req, res) => {
 			.input('Mantenimiento_Interno', sql.Bit, 1)
 			.input('Tipo_Servicio', sql.VarChar, Tipo_Servicio)
 			.input('Asignado_a', sql.VarChar, Asignado_a)
+			.input('idPeriodo', sql.Int, idPeriodo)
 			.input('Liberado_Por', sql.VarChar, Nombre_Solicitante)
 			.input('Aprobado_Por', sql.VarChar, Aprobado_Por)
 			.query(queries.newOrden);
 
 		res.json('Nueva Solicitud con exito');
 	} catch (error) {
+		console.log(error);
 		res.status(500);
 		res.send(error.message);
 	}
@@ -147,6 +149,36 @@ export const getSolRFC = async (req, res) => {
 	}
 };
 
+export const getSolPeriod = async (req, res) => {
+	const { periodo } = req.params;
+	try {
+		const pool = await getConnection();
+		const resPool = await pool
+			.request()
+			.input('idPeriodo', sql.VarChar, periodo)
+			.query(queries.solicitudesXPeriodo);
+		res.json(resPool.recordset);
+	} catch (error) {
+		res.status(500);
+		res.send(error.message);
+	}
+};
+
+export const getSolTermRFC = async (req, res) => {
+	const { RFC } = req.params;
+	try {
+		const pool = await getConnection();
+		const resPool = await pool
+			.request()
+			.input('RFC', sql.VarChar, RFC)
+			.query(queries.getTerminadaxRFC);
+		res.json(resPool.recordset);
+	} catch (error) {
+		res.status(500);
+		res.send(error.message);
+	}
+};
+
 export const getSolTerminadaRFC = async (req, res) => {
 	const { RFC } = req.params;
 	try {
@@ -185,11 +217,12 @@ export const updateOrdenAdmin = async (req, res) => {
 		Tipo_Servicio,
 		Asignado_a,
 		Fecha_Realizacion,
-		No_Control,
+		idPeriodo,
 	} = req.body;
 
 	try {
 		const pool = await getConnection();
+
 		await pool
 			.request()
 			.input('Folio_Completo', sql.VarChar, Folio_Completo)
@@ -198,15 +231,27 @@ export const updateOrdenAdmin = async (req, res) => {
 			.input('Asignado_a', sql.VarChar, Asignado_a)
 			.query(queries.updateOrdenAdmin);
 
-		if (!!Fecha_Realizacion && !!No_Control && !!Trabajo_Realizado) {
+		if (!!Fecha_Realizacion && !!Trabajo_Realizado) {
+			const Periodo = await pool
+				.request()
+				.input('idPeriodo', sql.Int, idPeriodo)
+				.query(queries.getPeriodo);
+			const getFolio = await pool
+				.request()
+				.input('idPeriodo', sql.Int, idPeriodo)
+				.query(queries.getFolioxPeriodoOrden);
+			const Folio = getFolio.recordset[0].Folio
+				? getFolio.recordset[0].Folio + 1
+				: 1;
+			const No_Control = Folio + '-' + Periodo.recordset[0].Periodo;
+
 			await pool
 				.request()
 				.input('Folio_Completo', sql.VarChar, Folio_Completo)
 				.input('Fecha_Realizacion', sql.Date, Fecha_Realizacion)
-				.input('Fecha_Aprobacion', sql.Date, Fecha_Realizacion)
-				.input('Fecha_Liberacion', sql.Date, Fecha_Realizacion)
 				.input('Trabajo_Realizado', sql.VarChar, Trabajo_Realizado)
-				.input('No_Control', sql.Int, No_Control)
+				.input('Folio', sql.Int, Folio)
+				.input('No_Control', sql.VarChar, No_Control)
 				.query(queries.updateOrdenFecha);
 		}
 
@@ -241,11 +286,12 @@ export const getSolProcesoQuery = async (req, res) => {
 		RFC = '',
 		Nombre_Solicitante = '',
 		Clave_Area = '',
-		Folio_Completo = '',
+		Folio = '',
 		Asignado_a = '',
-		Fecha_inicial = new Date(),
-		Fecha_final = new Date(),
+		Fecha1 = '',
+		Fecha2 = '',
 	} = req.body;
+
 	try {
 		const pool = await getConnection();
 		const resPool = await pool
@@ -254,15 +300,15 @@ export const getSolProcesoQuery = async (req, res) => {
 			.input('RFC', sql.VarChar, RFC + '%')
 			.input('Nombre_Solicitante', sql.VarChar, Nombre_Solicitante + '%')
 			.input('Clave_Area', Clave_Area + '%')
-			.input('Folio_Completo', sql.VarChar, Folio_Completo + '%')
+			.input('Folio', Folio + '%')
 			.input('Asignado_a', sql.VarChar, Asignado_a + '%')
-			// .input('Fecha_inicial', sql.Date, new Date())
-			// .input('Fecha_final', sql.Date, new Date())
+			.input('Fecha1', !!Fecha1 ? Fecha1 : '1000-01-01')
+			.input('Fecha2', !!Fecha2 ? Fecha2 : '5000-01-01')
 			.query(queries.SolicitudesProcesoQuery);
 		!!resPool && res.json(resPool.recordset);
 	} catch (error) {
-		console.log(error);
 		res.status(500);
+		console.log(error);
 		res.send(error.message);
 	}
 };
@@ -273,10 +319,10 @@ export const getSolTermQuery = async (req, res) => {
 		RFC = '',
 		Nombre_Solicitante = '',
 		Clave_Area = '',
-		Folio_Completo = '',
+		Folio = '',
 		Asignado_a = '',
-		Fecha_inicial = new Date(),
-		Fecha_final = new Date(),
+		Fecha1 = '',
+		Fecha2 = '',
 	} = req.body;
 	try {
 		const pool = await getConnection();
@@ -286,15 +332,36 @@ export const getSolTermQuery = async (req, res) => {
 			.input('RFC', sql.VarChar, RFC + '%')
 			.input('Nombre_Solicitante', sql.VarChar, Nombre_Solicitante + '%')
 			.input('Clave_Area', Clave_Area + '%')
-			.input('Folio_Completo', sql.VarChar, Folio_Completo + '%')
+			.input('Folio', Folio + '%')
 			.input('Asignado_a', sql.VarChar, Asignado_a + '%')
-			// .input('Fecha_inicial', sql.Date, new Date())
-			// .input('Fecha_final', sql.Date, new Date())
+			.input('Fecha1', !!Fecha1 ? Fecha1 : '1000-01-01')
+			.input('Fecha2', !!Fecha2 ? Fecha2 : '5000-01-01')
 			.query(queries.SolicitudesTerminadaQuery);
 		!!resPool && res.json(resPool.recordset);
 	} catch (error) {
-		console.log(error);
 		res.status(500);
+		console.log(error);
+		res.send(error.message);
+	}
+};
+
+export const rechazarOrden = async (req, res) => {
+	const { Folio_Completo } = req.params;
+	const { Trabajo_Realizado } = req.body;
+
+	try {
+		const pool = await getConnection();
+
+		await pool
+			.request()
+			.input('Trabajo_Realizado', sql.VarChar, Trabajo_Realizado)
+			.input('Folio_Completo', sql.VarChar, Folio_Completo)
+			.query(queries.cancelarOrden);
+
+		res.json('Orden cancelada');
+	} catch (error) {
+		res.status(500);
+		console.log(error);
 		res.send(error.message);
 	}
 };

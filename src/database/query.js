@@ -1,10 +1,10 @@
 export const queries = {
 	//Queries de Solicitud
 	getSolicitudesProceso:
-		'SELECT * FROM Solicitud_Mantenimiento WHERE Folio_Completo IN (SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 0) ' +
+		'SELECT * FROM Solicitud_Mantenimiento WHERE Folio_Completo IN (SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 0 AND Rechazado = 0) ' +
 		'AND idPeriodo = @idPeriodo',
 	getSolicitudesTerminadas:
-		'SELECT * FROM Solicitud_Mantenimiento WHERE Folio_Completo IN ( SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 1) ' +
+		'SELECT * FROM Solicitud_Mantenimiento WHERE Folio_Completo IN ( SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 1 OR Rechazado = 1) ' +
 		'AND idPeriodo = @idPeriodo',
 	getSolicitud:
 		'SELECT * FROM Solicitud_Mantenimiento WHERE Folio_Completo = @Folio_Completo',
@@ -17,10 +17,12 @@ export const queries = {
 		'(SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 1)',
 	getOrden:
 		'SELECT * FROM Orden_Trabajo WHERE Folio_Completo = @Folio_Completo',
+	solicitudesXPeriodo:
+		'SELECT * FROM Solicitud_Mantenimiento WHERE idPeriodo = @idPeriodo',
 	//Eliminar la solicitud, el estado de la solicitud y la orden de la soliciutd
 	delSolicitud:
-		'DELETE FROM Solicitud_Mantenimiento WHERE Folio_Completo = @Folio_Completo ' +
 		'DELETE FROM Orden_Trabajo WHERE Folio_Completo = @Folio_Completo ' +
+		'DELETE FROM Solicitud_Mantenimiento WHERE Folio_Completo = @Folio_Completo ' +
 		'DELETE FROM Estado WHERE idEstatus = @idEstatus ',
 	//Nueva solicitud = nueva solicitud sin id Estado, ponerle el id Estado de la solicitud recien creada(new solicitud y new Estado),
 	// y para terminar crar la orden correspondiente a la solicitud
@@ -28,6 +30,8 @@ export const queries = {
 		'SELECT TOP 1 Folio_Completo from Solicitud_Mantenimiento ORDER BY Folio_Completo DESC',
 	getFolioxPeriodo:
 		'SELECT MAX(Folio) AS Folio from Solicitud_Mantenimiento WHERE idPeriodo = @idPeriodo',
+	getFolioxPeriodoOrden:
+		'SELECT MAX(Folio) AS Folio from Orden_Trabajo WHERE idPeriodo = @idPeriodo',
 	newSolicitud:
 		'INSERT INTO Solicitud_Mantenimiento (Folio_Completo, Clave_Area, Nombre_Solicitante ,Fecha_Elaboracion,Descripcion_Servicio_Falla,Lugar_Especifico, ' +
 		'Horario_Atencion, Asignado_a, idEstatus, idPeriodo, Folio, RFC) ' +
@@ -39,13 +43,15 @@ export const queries = {
 		'UPDATE Estado SET Aceptado = @Aceptado, Rechazado = @Rechazado, En_proceso = @En_proceso, Terminado_tecnico = @Terminado_tecnico, ' +
 		'Aprobado_admin = @Aprobado_admin, Aprobado_cliente = @Aprobado_cliente WHERE idEstatus = @idEstatus',
 	newOrden:
-		'INSERT INTO Orden_Trabajo (Folio_Completo, Mantenimiento_Interno, Tipo_Servicio, Asignado_a, Liberado_Por, Aprobado_Por) ' +
-		'VALUES (@Folio_Completo, 1 , @Tipo_Servicio , @Asignado_a, @Liberado_Por, @Aprobado_Por)',
+		'INSERT INTO Orden_Trabajo (Folio_Completo, idPeriodo, Mantenimiento_Interno, Tipo_Servicio, Asignado_a, Liberado_Por, Aprobado_Por) ' +
+		'VALUES (@Folio_Completo, @idPeriodo, 1 , @Tipo_Servicio , @Asignado_a, @Liberado_Por, @Aprobado_Por)',
 	updateOrdenAdmin:
 		'UPDATE Orden_Trabajo SET Mantenimiento_Interno = @Mantenimiento_Interno, Tipo_Servicio = @Tipo_Servicio, ' +
 		'Asignado_a = @Asignado_a WHERE Folio_Completo = @Folio_Completo',
+	cancelarOrden:
+		'UPDATE Orden_Trabajo SET Trabajo_Realizado = @Trabajo_Realizado WHERE Folio_Completo = @Folio_Completo',
 	updateOrdenFecha:
-		'UPDATE Orden_Trabajo SET Fecha_Realizacion = @Fecha_Realizacion, Fecha_Aprobacion = @Fecha_Realizacion, Fecha_Liberacion = @Fecha_Realizacion, ' +
+		'UPDATE Orden_Trabajo SET Fecha_Realizacion = @Fecha_Realizacion, Folio = @Folio,  ' +
 		'No_Control = @No_Control, Trabajo_Realizado = @Trabajo_Realizado WHERE Folio_Completo = @Folio_Completo',
 	updateCalifOrden:
 		'UPDATE Orden_Trabajo SET Calificacion_Servicio = @Calificacion_Servicio, Comentario_Servicio = @Comentario_Servicio ' +
@@ -85,24 +91,26 @@ export const queries = {
 		'INSERT INTO Usuarios (RFC, Contraseña, Nombres, id_Usuario, Estatus) VALUES (@RFC, @Contraseña,' +
 		' @Nombres, @id_Usuario, 1 )',
 	updateUser:
-		'UPDATE Usuarios SET RFC = @RFC2 Nombres = @Nombres, id_Usuario = @id_Usuario WHERE RFC = @RFC',
+		'UPDATE Usuarios SET Nombres = @Nombres, id_Usuario = @id_Usuario WHERE RFC = @RFC',
 	updateEstadoUser: 'UPDATE Usuarios SET Estatus = @Estatus WHERE RFC = @RFC',
 	delUser: 'DELETE FROM Usuarios WHERE RFC = @RFC ',
 
 	//Queries de Alumnos
 	getAlumnos:
-		'SELECT * FROM Usuarios WHERE id_Usuario = 3 ' +
-		'SELECT * FROM Alumnos_Servicio',
+		'SELECT Usuarios.RFC, Usuarios.Contraseña, Usuarios.Nombres, Usuarios.id_Usuario, Usuarios.Estatus, ' +
+		'Alumnos_Servicio.No_Control, Alumnos_Servicio.Clave_Carrera FROM Usuarios INNER JOIN Alumnos_Servicio ' +
+		'ON Usuarios.RFC = Alumnos_Servicio.RFC ',
 	getAlumno:
-		'SELECT * FROM Usuarios WHERE id_Usuario = 3 AND RFC = @RFC ' +
-		'SELECT * FROM Alumnos_Servicio WHERE RFC = @RFC',
+		'SELECT Usuarios.RFC, Usuarios.Contraseña, Usuarios.Nombres, Usuarios.id_Usuario, Usuarios.Estatus, ' +
+		'Alumnos_Servicio.No_Control, Alumnos_Servicio.Clave_Carrera FROM Usuarios INNER JOIN Alumnos_Servicio ' +
+		'ON Usuarios.RFC = Alumnos_Servicio.RFC WHERE Usuarios.RFC = @RFC ',
 	newAlumno:
 		'INSERT INTO Usuarios (RFC, Contraseña, Nombres, id_Usuario, Estatus) VALUES (@RFC, @Contraseña,' +
 		' @Nombres, 3, 1  ) ' +
 		'INSERT INTO Alumnos_Servicio (No_Control, Clave_Carrera, RFC) VALUES (@No_Control,' +
 		' @Clave_Carrera, @RFC)',
 	updateAlumnos:
-		'UPDATE Usuarios SET RFC = @RFC2 Nombres = @Nombres WHERE RFC = @RFC ' +
+		'UPDATE Usuarios SET Nombres = @Nombres WHERE RFC = @RFC ' +
 		'UPDATE Alumnos_Servicio SET No_Control = @No_Control, Clave_Carrera = @Clave_Carrera WHERE RFC = @RFC ',
 	delAlumno:
 		'DELETE FROM Alumnos_Servicio WHERE RFC = @RFC ' +
@@ -127,10 +135,22 @@ export const queries = {
 	//Buscadores
 	SolicitudesProcesoQuery:
 		`SELECT * FROM Solicitud_Mantenimiento WHERE idPeriodo LIKE @idPeriodo  AND RFC LIKE @RFC AND  ` +
-		`Nombre_Solicitante LIKE @Nombre_Solicitante AND Clave_Area LIKE @Clave_Area AND  Folio_Completo ` +
-		` LIKE @Folio_Completo AND Asignado_a LIKE @Asignado_a AND Folio_Completo IN (SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 0)`,
+		`Nombre_Solicitante LIKE @Nombre_Solicitante AND Clave_Area LIKE @Clave_Area AND  Folio ` +
+		` LIKE @Folio AND Asignado_a LIKE @Asignado_a AND Fecha_Elaboracion BETWEEN @Fecha1 AND @Fecha2 ` +
+		`AND Folio_Completo IN (SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 0 AND Rechazado = 0)`,
 	SolicitudesTerminadaQuery:
 		`SELECT * FROM Solicitud_Mantenimiento WHERE idPeriodo LIKE @idPeriodo  AND RFC LIKE @RFC AND  ` +
-		`Nombre_Solicitante LIKE @Nombre_Solicitante AND Clave_Area LIKE @Clave_Area AND  Folio_Completo ` +
-		` LIKE @Folio_Completo AND Asignado_a LIKE @Asignado_a AND Folio_Completo IN (SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 1)`,
+		`Nombre_Solicitante LIKE @Nombre_Solicitante AND Clave_Area LIKE @Clave_Area AND  Folio ` +
+		` LIKE @Folio AND Asignado_a LIKE @Asignado_a AND Fecha_Elaboracion BETWEEN @Fecha1 AND @Fecha2 ` +
+		` AND Folio_Completo IN (SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 1 OR Rechazado = 1)`,
+	problemasQuery:
+		'SELECT * FROM Problemas_Frecuentes WHERE Descripcion LIKE @Descripcion AND Tipo LIKE @Tipo',
+	userQuery:
+		'SELECT * FROM Usuarios WHERE RFC LIKE @RFC AND Nombres LIKE @Nombres AND id_Usuario LIKE @id_Usuario AND id_Usuario NOT IN (3)',
+	alumnoQuery:
+		'SELECT Usuarios.RFC, Usuarios.Nombres, Usuarios.Estatus, ' +
+		'Alumnos_Servicio.No_Control, Alumnos_Servicio.Clave_Carrera FROM Usuarios INNER JOIN Alumnos_Servicio ' +
+		'ON Usuarios.RFC = Alumnos_Servicio.RFC WHERE Usuarios.RFC LIKE @RFC AND Usuarios.Nombres LIKE @Nombres AND ' +
+		'Alumnos_Servicio.No_Control LIKE @No_Control AND ' +
+		'Alumnos_Servicio.Clave_Carrera LIKE @Clave_Carrera',
 };

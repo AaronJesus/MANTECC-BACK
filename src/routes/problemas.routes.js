@@ -6,6 +6,7 @@ import {
 	getProbelmasAdmin,
 	getProbelmasCliente,
 	newProb,
+	probQuery,
 	updateProblema,
 } from '../controllers/problemas.controllers';
 
@@ -16,6 +17,7 @@ router.get('/problemasAdmin', getProbelmasAdmin);
 router.get('/problemasCliente', getProbelmasCliente);
 router.get('/problema/:id', getProbelma);
 router.post('/problemas', newProb);
+router.put('/problema/query', probQuery);
 router.put('/problema/:id', updateProblema);
 router.delete('/problema/:id', delProblema);
 
