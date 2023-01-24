@@ -2,19 +2,19 @@ export const queries = {
 	//Queries de Solicitud
 	getSolicitudesProceso:
 		'SELECT * FROM Solicitud_Mantenimiento WHERE Folio_Completo IN (SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 0 AND Rechazado = 0) ' +
-		'AND idPeriodo = @idPeriodo',
+		'AND idPeriodo = @idPeriodo ORDER BY Fecha_Elaboracion',
 	getSolicitudesTerminadas:
 		'SELECT * FROM Solicitud_Mantenimiento WHERE Folio_Completo IN ( SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 1 OR Rechazado = 1) ' +
-		'AND idPeriodo = @idPeriodo',
+		'AND idPeriodo = @idPeriodo ORDER BY Fecha_Elaboracion',
 	getSolicitud:
 		'SELECT * FROM Solicitud_Mantenimiento WHERE Folio_Completo = @Folio_Completo',
 	//solicitud en proceso x rfc
 	getSolicitudxRFC:
 		'SELECT * FROM Solicitud_Mantenimiento WHERE RFC = @RFC AND Folio_Completo IN ' +
-		'(SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 0)',
+		'(SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 0) AND idPeriodo = @idPeriodo ORDER BY Fecha_Elaboracion',
 	getTerminadaxRFC:
 		'SELECT * FROM Solicitud_Mantenimiento WHERE RFC = @RFC AND Folio_Completo IN ' +
-		'(SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 1)',
+		'(SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 1) AND idPeriodo = @idPeriodo ORDER BY Fecha_Elaboracion',
 	getOrden:
 		'SELECT * FROM Orden_Trabajo WHERE Folio_Completo = @Folio_Completo',
 	solicitudesXPeriodo:
@@ -153,4 +153,31 @@ export const queries = {
 		'ON Usuarios.RFC = Alumnos_Servicio.RFC WHERE Usuarios.RFC LIKE @RFC AND Usuarios.Nombres LIKE @Nombres AND ' +
 		'Alumnos_Servicio.No_Control LIKE @No_Control AND ' +
 		'Alumnos_Servicio.Clave_Carrera LIKE @Clave_Carrera',
+
+	//Reporte por meses
+	getRepProceso:
+		'SELECT Clave_Area, COUNT(Folio_Completo) AS TotalProceso FROM Solicitud_Mantenimiento WHERE Folio_Completo ' +
+		'IN (SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 0 AND Rechazado = 0) AND Fecha_Elaboracion BETWEEN ' +
+		'@Year1 AND @Year2 GROUP BY Clave_Area',
+
+	getRepTerminadas:
+		'SELECT Clave_Area, COUNT(Folio_Completo) AS TotalTerminadas FROM Solicitud_Mantenimiento WHERE Folio_Completo ' +
+		'IN (SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 1) AND Fecha_Elaboracion BETWEEN ' +
+		'@Year1 AND @Year2 GROUP BY Clave_Area',
+
+	getRepRechazadas:
+		'SELECT Clave_Area, COUNT(Folio_Completo) AS TotalRechazadas FROM Solicitud_Mantenimiento WHERE Folio_Completo ' +
+		'IN (SELECT idEstatus FROM Estado WHERE Rechazado = 1) AND Fecha_Elaboracion BETWEEN ' +
+		'@Year1 AND @Year2 GROUP BY Clave_Area',
+	getTotalAño:
+		'SELECT Clave_Area, COUNT(Folio_Completo) AS TotalAño FROM Solicitud_Mantenimiento WHERE Fecha_Elaboracion BETWEEN ' +
+		'@Year1 AND @Year2 GROUP BY Clave_Area',
+	getProcesoAño:
+		'SELECT Clave_Area, COUNT(Folio_Completo) AS AñoProceso FROM Solicitud_Mantenimiento WHERE Folio_Completo ' +
+		'IN (SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 0 AND Rechazado = 0) AND Fecha_Elaboracion BETWEEN ' +
+		'@Year1 AND @Year2 GROUP BY Clave_Area',
+	getTerminadoAño:
+		'SELECT Clave_Area, COUNT(Folio_Completo) AS AñoTerminado FROM Solicitud_Mantenimiento WHERE Folio_Completo ' +
+		'IN (SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 1 OR Rechazado = 1) AND Fecha_Elaboracion BETWEEN ' +
+		'@Year1 AND @Year2 GROUP BY Clave_Area',
 };

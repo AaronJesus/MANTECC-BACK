@@ -52,6 +52,10 @@ export const buildPDFOrd = (valores, dataCallback, endCallback) => {
 		Valor,
 	} = valores;
 
+	let tamaño1 = Liberado_Por.length;
+	let tamaño2 =
+		'Rodriguez Rodriguez Rodriguez Rodriguez Rodriguez Rodriguez Rodriguez Rodriguez Rodriguez Rodriguez ';
+
 	if (!!Fecha_Realizacion) {
 		var fecha = moment();
 		fecha.locale('es');
@@ -85,9 +89,31 @@ export const buildPDFOrd = (valores, dataCallback, endCallback) => {
 		doc.text('X', 470, 560); //Calificacion
 	}
 	doc.fontSize(10).text(Comentario_Servicio, 70, 600); //Comentario
-	doc.fontSize(10).text(Liberado_Por, 220, 630, { width: 120 }); //Verificado por
+	//Liberado_Por
+	if (tamaño1 <= 18) {
+		doc.fontSize(12).text(Liberado_Por, 216, 645, { width: 130 });
+	} else if (tamaño1 <= 32) {
+		doc.fontSize(11).text(Liberado_Por, 216, 635, { width: 130 });
+	} else if (tamaño1 <= 48) {
+		doc.fontSize(10).text(Liberado_Por, 216, 630, { width: 130 });
+	} else if (tamaño1 <= 64) {
+		doc.fontSize(9).text(Liberado_Por, 216, 630, { width: 130 });
+	} else if (tamaño1 <= 80) {
+		doc.fontSize(8).text(Liberado_Por, 216, 630, { width: 130 });
+	} else if (tamaño1 <= 100) {
+		doc.fontSize(5).text(Liberado_Por, 216, 630, { width: 130 });
+	}
 	doc.fontSize(12).text(fecha2, 440, 645); //fecha ver
-	doc.fontSize(10).text(Aprobado_Por, 155, 660, { width: 200 }); //Aprobado por
+	//Aprobado_Por
+	if (tamaño2.length <= 28) {
+		doc.fontSize(11).text(tamaño2, 150, 675, { width: 200 });
+	} else if (tamaño2.length <= 56) {
+		doc.fontSize(11).text(tamaño2, 150, 665, { width: 200 });
+	} else if (tamaño2.length <= 84) {
+		doc.fontSize(10).text(tamaño2, 150, 660, { width: 200 });
+	} else if (tamaño2.length <= 100) {
+		doc.fontSize(8).text(tamaño2, 150, 660, { width: 200 });
+	}
 	doc.fontSize(12).text(fecha2, 440, 675); //fecha aprob
 
 	doc.end();

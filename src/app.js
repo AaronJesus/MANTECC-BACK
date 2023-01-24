@@ -8,9 +8,8 @@ import alumnos from './routes/alumnos.routes';
 import problemas from './routes/problemas.routes';
 import configuraciones from './routes/configs.routes';
 import pdf from './routes/pdf.routes';
+import reporte from './routes/reporte.routes';
 import cors from 'cors';
-import { queries } from './database/query';
-import { getUsuarios } from './controllers/usuarios.controllers';
 
 const app = express();
 
@@ -32,6 +31,7 @@ app.use(function (req, res, next) {
 
 app.use(express.urlencoded({ extended: false }));
 
+app.use(reporte);
 app.use(solicitudes);
 app.use(estados);
 app.use(areas);

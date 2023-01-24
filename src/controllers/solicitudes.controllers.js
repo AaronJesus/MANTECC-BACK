@@ -135,11 +135,12 @@ export const getSolicitud = async (req, res) => {
 };
 
 export const getSolRFC = async (req, res) => {
-	const { RFC } = req.params;
+	const { RFC, periodo } = req.params;
 	try {
 		const pool = await getConnection();
 		const resPool = await pool
 			.request()
+			.input('idPeriodo', sql.Int, periodo)
 			.input('RFC', sql.VarChar, RFC)
 			.query(queries.getSolicitudxRFC);
 		res.json(resPool.recordset);
@@ -165,26 +166,12 @@ export const getSolPeriod = async (req, res) => {
 };
 
 export const getSolTermRFC = async (req, res) => {
-	const { RFC } = req.params;
+	const { RFC, periodo } = req.params;
 	try {
 		const pool = await getConnection();
 		const resPool = await pool
 			.request()
-			.input('RFC', sql.VarChar, RFC)
-			.query(queries.getTerminadaxRFC);
-		res.json(resPool.recordset);
-	} catch (error) {
-		res.status(500);
-		res.send(error.message);
-	}
-};
-
-export const getSolTerminadaRFC = async (req, res) => {
-	const { RFC } = req.params;
-	try {
-		const pool = await getConnection();
-		const resPool = await pool
-			.request()
+			.input('idPeriodo', sql.VarChar, periodo)
 			.input('RFC', sql.VarChar, RFC)
 			.query(queries.getTerminadaxRFC);
 		res.json(resPool.recordset);
@@ -258,6 +245,7 @@ export const updateOrdenAdmin = async (req, res) => {
 		res.json('Orden actualizada');
 	} catch (error) {
 		res.status(500);
+		console.log(error);
 		res.send(error.message);
 	}
 };
@@ -338,27 +326,6 @@ export const getSolTermQuery = async (req, res) => {
 			.input('Fecha2', !!Fecha2 ? Fecha2 : '5000-01-01')
 			.query(queries.SolicitudesTerminadaQuery);
 		!!resPool && res.json(resPool.recordset);
-	} catch (error) {
-		res.status(500);
-		console.log(error);
-		res.send(error.message);
-	}
-};
-
-export const rechazarOrden = async (req, res) => {
-	const { Folio_Completo } = req.params;
-	const { Trabajo_Realizado } = req.body;
-
-	try {
-		const pool = await getConnection();
-
-		await pool
-			.request()
-			.input('Trabajo_Realizado', sql.VarChar, Trabajo_Realizado)
-			.input('Folio_Completo', sql.VarChar, Folio_Completo)
-			.query(queries.cancelarOrden);
-
-		res.json('Orden cancelada');
 	} catch (error) {
 		res.status(500);
 		console.log(error);
