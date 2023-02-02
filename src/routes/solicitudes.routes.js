@@ -25,8 +25,8 @@ router.put('/solicitudes/terminadas', getSolicitudesTerminadas);
 router.put('/solicitudes/terminadas/query', getSolTermQuery);
 router.post('/solicitudes', newSolicitud);
 router.get('/solicitud/:Folio_Completo', getSolicitud);
-router.get('/solicitudRFC/:RFC/:periodo', getSolRFC);
-router.get('/solicitudRFC/term/:RFC/:periodo', getSolTermRFC);
+router.get('/solicitudRFC/:RFC', getSolRFC);
+router.get('/solicitudRFC/term/:RFC', getSolTermRFC);
 router.get('/solicitudes/periodo/:periodo', getSolPeriod);
 router.delete('/solicitud/:Folio_Completo', deleteSol);
 

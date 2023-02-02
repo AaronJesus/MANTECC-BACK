@@ -53,8 +53,7 @@ export const buildPDFOrd = (valores, dataCallback, endCallback) => {
 	} = valores;
 
 	let tamaño1 = Liberado_Por.length;
-	let tamaño2 =
-		'Rodriguez Rodriguez Rodriguez Rodriguez Rodriguez Rodriguez Rodriguez Rodriguez Rodriguez Rodriguez ';
+	let tamaño2 = Aprobado_Por.length;
 
 	if (!!Fecha_Realizacion) {
 		var fecha = moment();
@@ -105,14 +104,14 @@ export const buildPDFOrd = (valores, dataCallback, endCallback) => {
 	}
 	doc.fontSize(12).text(fecha2, 440, 645); //fecha ver
 	//Aprobado_Por
-	if (tamaño2.length <= 28) {
-		doc.fontSize(11).text(tamaño2, 150, 675, { width: 200 });
-	} else if (tamaño2.length <= 56) {
-		doc.fontSize(11).text(tamaño2, 150, 665, { width: 200 });
-	} else if (tamaño2.length <= 84) {
-		doc.fontSize(10).text(tamaño2, 150, 660, { width: 200 });
-	} else if (tamaño2.length <= 100) {
-		doc.fontSize(8).text(tamaño2, 150, 660, { width: 200 });
+	if (tamaño2 <= 28) {
+		doc.fontSize(11).text(Aprobado_Por, 150, 675, { width: 200 });
+	} else if (tamaño2 <= 56) {
+		doc.fontSize(11).text(Aprobado_Por, 150, 665, { width: 200 });
+	} else if (tamaño2 <= 84) {
+		doc.fontSize(10).text(Aprobado_Por, 150, 660, { width: 200 });
+	} else if (tamaño2 <= 100) {
+		doc.fontSize(8).text(Aprobado_Por, 150, 660, { width: 200 });
 	}
 	doc.fontSize(12).text(fecha2, 440, 675); //fecha aprob
 

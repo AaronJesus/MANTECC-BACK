@@ -11,10 +11,10 @@ export const queries = {
 	//solicitud en proceso x rfc
 	getSolicitudxRFC:
 		'SELECT * FROM Solicitud_Mantenimiento WHERE RFC = @RFC AND Folio_Completo IN ' +
-		'(SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 0) AND idPeriodo = @idPeriodo ORDER BY Fecha_Elaboracion',
+		'(SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 0) ORDER BY Fecha_Elaboracion',
 	getTerminadaxRFC:
 		'SELECT * FROM Solicitud_Mantenimiento WHERE RFC = @RFC AND Folio_Completo IN ' +
-		'(SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 1) AND idPeriodo = @idPeriodo ORDER BY Fecha_Elaboracion',
+		'(SELECT idEstatus FROM Estado WHERE Aprobado_cliente = 1) ORDER BY Fecha_Elaboracion',
 	getOrden:
 		'SELECT * FROM Orden_Trabajo WHERE Folio_Completo = @Folio_Completo',
 	solicitudesXPeriodo:

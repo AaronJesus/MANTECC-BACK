@@ -135,12 +135,11 @@ export const getSolicitud = async (req, res) => {
 };
 
 export const getSolRFC = async (req, res) => {
-	const { RFC, periodo } = req.params;
+	const { RFC } = req.params;
 	try {
 		const pool = await getConnection();
 		const resPool = await pool
 			.request()
-			.input('idPeriodo', sql.Int, periodo)
 			.input('RFC', sql.VarChar, RFC)
 			.query(queries.getSolicitudxRFC);
 		res.json(resPool.recordset);
@@ -166,12 +165,11 @@ export const getSolPeriod = async (req, res) => {
 };
 
 export const getSolTermRFC = async (req, res) => {
-	const { RFC, periodo } = req.params;
+	const { RFC } = req.params;
 	try {
 		const pool = await getConnection();
 		const resPool = await pool
 			.request()
-			.input('idPeriodo', sql.VarChar, periodo)
 			.input('RFC', sql.VarChar, RFC)
 			.query(queries.getTerminadaxRFC);
 		res.json(resPool.recordset);
